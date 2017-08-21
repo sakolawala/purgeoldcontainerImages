@@ -10,7 +10,6 @@ args = parser.parse_args()
 
 rootrepolist = []
 repolist = []
-repoListTags = []
 numOfContainersToKeep = int(args.Keep)
 whatif = bool(args.WhatIf)
 env = args.Environment
@@ -47,6 +46,7 @@ for rootrepo in rootrepolist:
 
 # List all images
 for repo in repolist:
+    repoListTags = []
     print "### Processing tag list [" + repo + "] ...."
     cmdListTag = "gcloud container images list-tags " + repo
     output = execute(cmdListTag)
