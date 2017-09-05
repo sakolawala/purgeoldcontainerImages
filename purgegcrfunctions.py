@@ -26,4 +26,4 @@ def imagestoremove(imageTagList, numOfContainersToKeep):
     ImagesToRemove = versions[0:splitRowCount]
     print "### Images list to remove"
     print ImagesToRemove
-    return  ImagesToRemove
+    return ImagesToRemove

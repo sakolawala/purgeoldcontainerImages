@@ -10,7 +10,6 @@ args = parser.parse_args()
 
 rootrepolist = []
 repolist = []
-repoListTags = []
 numOfContainersToKeep = int(args.Keep)
 whatif = bool(args.WhatIf)
 env = args.Environment
@@ -21,7 +20,7 @@ cmdRepoList = "gcloud container images list --repository=asia.gcr.io/cexdev-offi
 output = execute(cmdRepoList)
 output = output.split('\n')
 
-print "### Processing root repo...."
+print "\n\n### Processing root repo...."
 for line in output:
     if (line.startswith('asia.gcr.io')
     and env in line):
@@ -35,6 +34,7 @@ if countofrootrepo < 1:
 print "### Processing child repo within root repo...."
 # loop in each repo for more image
 for rootrepo in rootrepolist:
+    repoListTags = []
     print "### Processing child repo [" + rootrepo + "] ...."
     cmdInternalRepoList = "gcloud container images list --repository=" + rootrepo
     output = execute(cmdInternalRepoList)
@@ -60,7 +60,13 @@ for repo in repolist:
             if ('DIGEST' not in line 
                     and line.strip() != ""): #line is not header and empty line
                 items = line.split()
-                repoListTags.append((repo, items[1], items[2]))
+                countofItems = len(items)
+                imgname = repo
+                digest = items[0]
+                imgtag = items[1]
+                timestamp = items[2]
+                repoListTags.append((imgname, imgtag, timestamp, digest))
+
         imgstodelete = imagestoremove(repoListTags, numOfContainersToKeep)
 
         # Delete imaages
@@ -68,9 +74,19 @@ for repo in repolist:
             for img in imgstodelete:
                 imgname = img[0]
                 imgtag = img[1]
-                fullimagename = imgname + ":" + imgtag
-                print "### Deleting image [" + fullimagename + "] ...."
-                removetagcmd = "gcloud container images delete " + fullimagename + " --quiet"
+                imgDigest = img[3]
+                if imgtag.find(",") == -1:
+                    # It's not multi tag
+                    fullimagename = imgname + ":" + imgtag
+                    print "### Deleting image [" + fullimagename + "] ...."
+                    removetagcmd = "gcloud container images delete " + fullimagename + " --quiet"
+                else:
+                    # It multitag image
+                    fullimagename = imgname + "@sha256:" + imgDigest
+                    print "### Image [" + imgname + "] has multi-tags '" + imgtag + "' ...."
+                    print "### Deleting image digest [" + fullimagename + "] ...."
+                    removetagcmd = "gcloud container images delete " + fullimagename + " --quiet --force-delete-tags"
+
                 print removetagcmd
                 output = execute(removetagcmd)
                 print output
