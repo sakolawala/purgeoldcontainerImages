@@ -47,6 +47,7 @@ for rootrepo in rootrepolist:
 
 # List all images
 for repo in repolist:
+    repoListTags = []
     print "### Processing tag list [" + repo + "] ...."
     cmdListTag = "gcloud container images list-tags " + repo
     output = execute(cmdListTag)
