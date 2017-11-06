@@ -21,10 +21,14 @@ output = execute(cmdRepoList)
 output = output.split('\n')
 
 print "\n\n### Processing root repo...."
-for line in output:
-    if (line.startswith('asia.gcr.io')
-    and env in line):
-        rootrepolist.append(line)
+for line in output:    
+    if (line.startswith('asia.gcr.io')):
+        reponame = line.replace('asia.gcr.io/cexdev-office-dev/', '')
+        if (env in reponame):
+            rootrepolist.append(line)
+
+print "# Dev repo list"
+print rootrepolist
 
 countofrootrepo=len(rootrepolist)
 if countofrootrepo < 1:
@@ -43,7 +47,7 @@ for rootrepo in rootrepolist:
     for line in output:
         if line.startswith('asia.gcr.io'):
             repolist.append(line)    
-    break
+    
 
 # List all images
 for repo in repolist:
@@ -62,11 +66,16 @@ for repo in repolist:
                     and line.strip() != ""): #line is not header and empty line
                 items = line.split()
                 countofItems = len(items)
-                imgname = repo
-                digest = items[0]
-                imgtag = items[1]
-                timestamp = items[2]
-                repoListTags.append((imgname, imgtag, timestamp, digest))
+                if (countofItems == 3):
+                    imgname = repo
+                    digest = items[0]
+                    imgtag = items[1]
+                    timestamp = items[2]
+                    repoListTags.append((imgname, imgtag, timestamp, digest))
+                else:
+                    print "### Following Image has no version"
+                    print line
+                    raise "GCR image without version tag" 
 
         imgstodelete = imagestoremove(repoListTags, numOfContainersToKeep)
 
