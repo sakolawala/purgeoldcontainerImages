@@ -46,16 +46,8 @@ class DockerHelper(object):
 
         return shabsImageList
 
-
-    def RemoveContainerImage(self, short_image_ID):
-        client = docker.from_env()
-        conimages = client.images.list()
-        # ImageName, Version, imageshortId, ImageDate
-        for img in conimages:
-            if img.short_id == short_image_ID:
-                print "Removing Container " + img.short_id
-                try:
-                    client.images.remove(img.id)
-                except Exception as e:
-                    print e.__doc__
-                    print e.message
+    def RemoveContainerImage(self, short_image_ID, imageName, imgTag):
+        client = self.client
+        imgFullname = imageName + ":" + imgTag
+        print "Removing Container " + imgFullname
+        client.images.remove(imgFullname)

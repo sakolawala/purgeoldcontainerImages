@@ -24,6 +24,8 @@ conImageList = objdockerhelper.GetListOfImages()
 
 # Slice multi dimension list to extract just imageName
 npArr  = np.array(conImageList)
+logger.debug("Complete list of images")
+logger.debug(npArr)
 imgNames  = npArr[:, 0]
 print "### Total images found: ", len(imgNames)
 uniqueImgNames, counts = np.unique(imgNames, return_counts=True)
@@ -59,8 +61,12 @@ for img in imagesWithMoreThanNthVersion:
     ImageIds = ImagesToRemove[:, 2]
     if not whatif == "True":
         # Removing Images
-        for imgId in ImageIds:
-            objdockerhelper.RemoveContainerImage(imgId)
+        for img in ImagesToRemove:
+            imgName = img[0]
+            imgTag = img[1]
+            imgShortId = img[2]
+            imgCreateTime = img[3]
+            objdockerhelper.RemoveContainerImage(imgShortId, imgName, imgTag)
     else:
         print "### WHATIF flag found, won't be deleting the container "
 
